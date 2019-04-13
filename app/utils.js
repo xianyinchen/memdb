@@ -182,7 +182,10 @@ exports.remoteExec = function(ip, cmd, opts){
     var child = null;
     // localhost with current user
     if((ip === '127.0.0.1' || ip.toLowerCase() === 'localhost') && user === process.env.USER){
-        child = child_process.spawn('bash', ['-c', cmd]);
+        if( process.platform === "win32")
+            child = child_process.exec(cmd , function(error, stdout, stderr){});
+        else
+            child = child_process.spawn('bash', ['-c', cmd]);
     }
     // run remote via ssh
     else{
@@ -193,9 +196,11 @@ exports.remoteExec = function(ip, cmd, opts){
     var stdout = '', stderr = '';
     child.stdout.on('data', function(data){
         stdout += data;
+        console.log('*', stdout)
     });
     child.stderr.on('data', function(data){
         stderr += data;
+        console.error('*', stdout)
     });
     child.on('exit', function(code, signal){
         if(successCodes.indexOf(code) !== -1){
